@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aplikasi To-Do Sederhana</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+</head>
+<body class="p-4">
+  <div class="container">
+    <h1 class="mb-4">To-Do List</h1>
+
+    <div class="mb-3">
+      <input type="text" id="todo-input" class="form-control d-inline w-75" placeholder="Apa yang ingin kamu lakukan?" />
+      <button id="add-btn" class="btn btn-primary">Tambah</button>
+    </div>
+
+    <ul id="todo-list" class="list-group">
+      <!-- Item to-do akan ditambahkan di sini -->
+    </ul>
+  </div>
+
+  <!-- Axios CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- Script custom aplikasi -->
+  <script>
+    // Ambil referensi elemen-elemen penting
+    const todoInput = document.getElementById('todo-input');
+    const addBtn = document.getElementById('add-btn');
+    const todoList = document.getElementById('todo-list');
+
+    // Fungsi untuk memuat semua to-do dari server dan menampilkannya
+    function loadTodos() {
+      axios.get('/todos')
+        .then(res => {
+          const todos = res.data;
+          todoList.innerHTML = ''; // bersihkan list
+          todos.forEach(todo => {
+            // Buat elemen list item untuk tiap to-do
+            const li = document.createElement('li');
+            li.textContent = todo.task;
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            // Tombol hapus
+            const delBtn = document.createElement('button');
+            delBtn.textContent = 'Hapus';
+            delBtn.className = 'btn btn-sm btn-danger';
+            delBtn.onclick = () => deleteTodo(todo.id);
+            li.appendChild(delBtn);
+            todoList.appendChild(li);
+          });
+        })
+        .catch(err => console.error('Gagal memuat todos:', err));
+    }
+
+    // Fungsi untuk menambah to-do baru ke server
+    function addTodo() {
+      const taskText = todoInput.value.trim();
+      if (taskText === '') return;
+      axios.post('/todos', { task: taskText })
+        .then(res => {
+          todoInput.value = '';    // kosongkan input
+          loadTodos();             // refresh list
+        })
+        .catch(err => console.error('Gagal menambah todo:', err));
+    }
+
+    // Fungsi untuk menghapus to-do di server berdasarkan id
+    function deleteTodo(id) {
+      axios.delete('/todos/' + id)
+        .then(res => {
+          loadTodos(); // refresh list setelah berhasil hapus
+        })
+        .catch(err => console.error('Gagal menghapus todo:', err));
+    }
+
+    // Event handler
+    addBtn.addEventListener('click', addTodo);
+
+    // Load todos saat halaman pertama kali dibuka
+    loadTodos();
+  </script>
+</body>
+</html>
