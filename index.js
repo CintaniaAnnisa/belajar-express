@@ -9,7 +9,7 @@ const PORT = 8000
 // app.get("/cars", (req, res)=>{
 //     res.send("This is cars page uhuy")
 // })
-
+//nisa
 app.use(express.json())
 app.use(express.static('public'))
 
